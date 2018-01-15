@@ -2,7 +2,7 @@ from django.urls import reverse, resolve
 from django.test import TestCase
 
 from ..models import Board
-from ..views import new_topic
+from ..views import TopicListView
 
 
 
@@ -21,8 +21,8 @@ class BoardTopicTests(TestCase):
 		self.assertEquals(response.status_code, 404)
 
 	def test_new_topic_url_resolves_new_topic_view(self):
-		view = resolve('/boards/1/new/')
-		self.assertEquals(view.func, new_topic)
+		view = resolve('/boards/1/')
+		self.assertEquals(view.func.view_class, TopicListView)
 
 	def test_board_topic_view_contains_link_back_to_board_topic(self):
 		board_topics_url = reverse('board_topics', kwargs={'pk': 1})

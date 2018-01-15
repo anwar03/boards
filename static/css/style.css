@@ -1,3 +1,9 @@
 .navbar-brand {
   font-family: 'Peralta', cursive;
 }
+
+table-header{
+  background-color: #343a40;
+  color: #f8f8fa;
+  opacity: 0.8;
+}
