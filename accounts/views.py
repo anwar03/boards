@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import UpdateView
+from django.views.generic import UpdateView, CreateView
 
 
 from .forms import signUpForm
@@ -23,6 +23,11 @@ def signup(request):
         form = signUpForm()
     
     return render(request, 'signup.html',  { 'form': form })
+
+
+class SignUp(CreateView):
+
+    pass
 
 
 class UserUpdateView(UpdateView):

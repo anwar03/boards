@@ -7,3 +7,7 @@ table-header{
   color: #f8f8fa;
   opacity: 0.8;
 }
+
+.helptext{
+  visibility: hidden;
+}

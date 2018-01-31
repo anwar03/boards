@@ -3,14 +3,15 @@ from django.http import HttpResponse, Http404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
-from django.views.generic import UpdateView, ListView
+from django.views.generic import UpdateView, ListView, CreateView
+from django.views.generic.edit import DeleteView
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
 from .models import Board, Topic, Post
-from .forms import NewTopicForm, PostForm
+from .forms import NewTopicForm, PostForm, NewBoardForm
 
 # Create your views here.
 
@@ -37,29 +38,6 @@ class TopicListView(ListView):
 		return queryset
 
 
-@login_required
-def new_topic(request, pk):
-	board = get_object_or_404(Board, pk=pk)
-	user = User.objects.first()
-
-	if request.method == 'POST':
-		form = NewTopicForm(request.POST)
-		if form.is_valid():
-			topic = form.save(commit=False)
-			topic.board = board
-			topic.starter = request.user
-			topic.save()
-
-			post = Post.objects.create(
-				message= form.cleaned_data.get('message'),
-				topic = topic,
-				created_by = request.user
-			)		
-			return redirect('topic_posts', pk=pk, topic_pk=topic.pk)
-	else:
-		form = NewTopicForm()
-	return render(request, 'new_topic.html', {'board': board, 'form': form })
-
 
 class PostListView(ListView):
 	model = Post
@@ -84,31 +62,37 @@ class PostListView(ListView):
 		queryset = self.topic.posts.order_by('created_at')
 		return queryset
 
-@login_required
-def reply_topic(request, pk, topic_pk):
-    topic = get_object_or_404(Topic, board__pk=pk, pk=topic_pk)
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.topic = topic
-            post.created_by = request.user
-            post.save()
 
-            topic.last_updated = timezone.now()
-            topic.save()
+@method_decorator(login_required, name='dispatch')
+class ReplyTopic(CreateView):
+	form_class = PostForm
+	template_name = 'reply_topic.html'
+	context_object_name = 'posts'
 
-            topic_url = reverse('topic_posts', kwargs={'pk': pk, 'topic_pk': topic_pk})
-            topic_post_url = '{url}?page={page}#{id}'.format(
+	def get_context_data(self, **kwargs):
+		self.topic = get_object_or_404(Topic, board__pk=self.kwargs.get('pk'), pk=self.kwargs.get('topic_pk'))
+		kwargs['topic'] = self.topic
+		return super().get_context_data(**kwargs)
+
+
+	def form_valid(self, form):
+		self.topic = get_object_or_404(Topic, board__pk=self.kwargs.get('pk'), pk=self.kwargs.get('topic_pk'))
+		post = form.save(commit=False)
+		post.topic = self.topic
+		post.created_by = self.request.user
+		post.save()
+
+		self.topic.last_updated = timezone.now()
+		self.topic.save()
+
+		topic_url = reverse('topic_posts', kwargs={'pk': self.kwargs.get('pk'), 'topic_pk': self.kwargs.get('topic_pk')})
+		topic_post_url = '{url}?page={page}#{id}'.format(
                 url=topic_url,
                 id=post.pk,
-                page=topic.get_page_count()
+                page=self.topic.get_page_count()
             )
+		return redirect( topic_post_url )
 
-            return redirect(topic_post_url)
-    else:
-        form = PostForm()
-    return render(request, 'reply_topic.html', {'topic': topic, 'form': form})		
 
 @method_decorator(login_required, name='dispatch')
 class PostUpdateView(UpdateView):
@@ -129,3 +113,47 @@ class PostUpdateView(UpdateView):
 		post.updated_at = timezone.now()
 		post.save()
 		return redirect('topic_posts', pk=post.topic.board.pk, topic_pk=post.topic.pk )
+
+
+@method_decorator(login_required, name='dispatch')
+class CreateNewTopic(CreateView):
+	form_class = NewTopicForm
+	template_name = 'new_topic.html'
+	
+	def get_context_data(self, **kwargs):
+		self.board = get_object_or_404(Board, pk=self.kwargs.get('pk'))
+		kwargs['board'] = self.board
+		return super().get_context_data(**kwargs)
+	
+	def form_valid(self, form):
+		self.board = get_object_or_404(Board, pk=self.kwargs.get('pk'))
+		topic = form.save(commit=False)
+		topic.board = self.board
+		topic.starter = self.request.user
+		topic.save()
+
+		post = Post.objects.create(
+				message= form.cleaned_data.get('message'),
+				topic = topic,
+				created_by = self.request.user
+			)
+		
+		return redirect('topic_posts', pk= self.board.pk, topic_pk=topic.pk)
+	
+
+class DeleteTopic(DeleteView):
+	model = Topic
+	success_url = 'board_topics'
+	template_name = 'topic_confirm_delete.html'
+
+
+class CreateNewBoard(CreateView):
+	form_class = NewBoardForm
+	template_name = 'new_board.html'
+	
+	def form_valid(self, form):
+		board = form.save()
+		return redirect('home')
+
+
+

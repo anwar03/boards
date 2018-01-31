@@ -24,6 +24,7 @@
         <th>Replies</th>
         <th>Views</th>
         <th>Last Update</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody>
@@ -48,6 +49,7 @@
           <td class="align-middle">{{ topic.replies }}</td>
           <td class="align-middle">{{ topic.views }}</td>
           <td class="align-middle">{{ topic.last_updated|naturaltime }}</td>
+          <td><a href="{% url 'topic_delete' topic.board.pk topic.pk %}" class="btn btn-danger pull-right" role="button">Delete</a></td>
         </tr>
       {% endfor %}
     </tbody>

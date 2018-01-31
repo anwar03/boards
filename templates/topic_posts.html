@@ -14,6 +14,7 @@
 
   <div class="mb-4">
     <a href="{% url 'reply_topic' topic.board.pk topic.pk %}" class="btn btn-primary" role="button">Reply</a>
+    <a href="{% url 'topic_delete' topic.board.pk topic.pk %}" class="btn btn-danger pull-right" role="button">Delete</a>
   </div>
 
   {% for post in posts %}
