@@ -12,6 +12,7 @@
         <th>Posts</th>
         <th>Topics</th>
         <th>Last Post</th>
+        {% if request.user.is_superuser %}<th>Action</th>{% endif %}
       </tr>
     </thead>
     <tbody>
@@ -42,6 +43,9 @@
               {% endif %}
             {% endwith %}
           </td>
+          {% if request.user.is_superuser %}
+          <td><a href="{% url 'delete_board' board.pk %}" class="btn btn-danger">Delete</a></td>
+          {% endif %}
         </tr>
       {% endfor %}
     </tbody>

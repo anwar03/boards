@@ -4,15 +4,14 @@
 
 {% block title %}Post a reply{% endblock %}
 
+
 {% block breadcrumb %}
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Boards</a></li>
-  <li class="breadcrumb-item"><a href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
-  <li class="breadcrumb-item"><a href="{% url 'topic_posts' topic.board.pk topic.pk %}">{{ topic.subject }}</a></li>
 {% endblock %}
 
 {% block content %}
 <form  method="post">{% csrf_token %}
-    <p>Are you sure you want to delete "{{ topic.subject }}"?</p>
+    <p>Are you sure you want to delete "{{ board.name }}"?</p>
     <button type="submit" class="btn btn-danger">Yeap, I'm sure.</button>
 </form>
 

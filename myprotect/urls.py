@@ -21,7 +21,7 @@ from blog import views
 
 urlpatterns = [
 	url(r'^$', views.BoardListView.as_view(), name='home'),
-    url(r'^signup/$', accounts_views.signup, name='signup'),
+    url(r'^signup/$', accounts_views.SignUp.as_view(), name='signup'),
     url(r'^login/$', auth_views.LoginView.as_view(template_name = 'login.html'), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
     url(r'^settings/accounts/$', accounts_views.UserUpdateView.as_view(), name='my_accounts'),
@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^settings/password/done/$', auth_views.PasswordChangeDoneView.as_view(template_name='password_change_done.html'), name='password_change_done'),
     url(r'^newboard/$',views.CreateNewBoard.as_view(), name='new_board'),
     url(r'^boards/(?P<pk>\d+)/$', views.TopicListView.as_view(), name='board_topics'),
+    url(r'^boards/(?P<pk>\d+)/delete/$', views.DeleteBoard.as_view(), name='delete_board'),
     url(r'^boards/(?P<pk>\d+)/new/$', views.CreateNewTopic.as_view(), name='new_topic'),
     url(r'^boards/(?P<pk>\d+)/topics/(?P<topic_pk>\d+)/$', views.PostListView.as_view(), name='topic_posts'),
     url(r'^boards/(?P<pk>\d+)/topics/(?P<topic_pk>\d+)/delete/$', views.DeleteTopic.as_view(), name='topic_delete'),

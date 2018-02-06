@@ -96,9 +96,7 @@ class ReplyTopic(CreateView):
 
 @method_decorator(login_required, name='dispatch')
 class PostUpdateView(UpdateView):
-
-	model = Post
-	fields = ['message', ]
+	form_class = PostForm
 	template_name = 'edit_post.html'
 	pk_url_kwarg = 'post_pk'
 	context_object_name = 'post'
@@ -143,9 +141,45 @@ class CreateNewTopic(CreateView):
 
 class DeleteTopic(DeleteView):
 	model = Topic
-	success_url = 'board_topics'
 	template_name = 'topic_confirm_delete.html'
 
+	
+	def get_context_data(self, **kwargs):
+		self.topic = get_object_or_404(Topic, board__pk=self.kwargs.get('pk'), pk=self.kwargs.get('topic_pk'))
+		print('Topic: ', self.topic)
+		kwargs['topic'] = self.topic
+		return super(DeleteTopic, self).get_context_data(**kwargs)
+
+	def get_object(self, queryset=None):
+		obj = super(DeleteTopic, self).get_object()
+		self.board = get_object_or_404(Board, pk=self.kwargs.get('pk'))
+		print('get object board: ', self.board.pk)
+		print('get object obj: ', obj.pk)
+		return obj
+
+	@method_decorator(login_required)
+	def dispatch(self, *args, **kwargs):
+		print('dispatch')
+		return super(DeleteTopic, self).dispatch(*args, **kwargs)
+
+	def get_success_url(self):
+		print('get success url: ', self.board.pk)
+		return reverse('board_topics', args=(self.board.pk,))
+
+
+@method_decorator(login_required, name='dispatch')
+class DeleteBoard(DeleteView):
+	model = Board
+	success_url = reverse_lazy('home')
+	template_name = 'board_confirm_delete.html'
+
+
+	def get_context_data(self, **kwargs):
+		self.board = Board.objects.all()
+		kwargs['board'] = self.board
+		return super(DeleteBoard, self).get_context_data(**kwargs)
+
+	
 
 class CreateNewBoard(CreateView):
 	form_class = NewBoardForm
