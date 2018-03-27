@@ -1,4 +1,4 @@
-"""myprotect URL Configuration
+"""boards URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.0/topics/http/urls/
@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 from accounts import views as accounts_views
-from blog import views
+from board import views
 
 urlpatterns = [
 	url(r'^$', views.BoardListView.as_view(), name='home'),
