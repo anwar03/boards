@@ -2,14 +2,14 @@ from django.contrib.auth.models import User
 from django.urls import resolve, reverse
 from django.test import TestCase
 from django.contrib.auth.forms import UserCreationForm
-from ..views import signup
+from ..views import SignUp
 from ..forms import signUpForm
 
 class SignUpForm(TestCase):
 
     def test_form_has_field(self):
         form = signUpForm()
-        expected = ['username', 'email', 'password1', 'password2']
+        expected = ['email', 'username', 'password1', 'password2']
         actual = list(form.fields)
         self.assertSequenceEqual(expected, actual)
 
@@ -23,7 +23,7 @@ class signUpTests(TestCase):
 
     def test_signup_url_resolves_signup_view(self):
         view = resolve('/signup/')
-        self.assertEquals(view.func, signup)
+        self.assertEquals(view.func.view_class, SignUp)
 
     def test_csrftoken(self):
         self.assertContains(self.response, 'csrfmiddlewaretoken')
